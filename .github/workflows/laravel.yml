@@ -1,0 +1,52 @@
+
+name: Laravel
+
+on:
+  push:
+    branches: [ "main" ]
+
+
+jobs:
+  laravel-tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+        
+     - name: Get Github action IP
+       id: ip
+       uses: haythem/public-ip@v1.2
+       
+     - name: Configure AWS credentials from Test account
+       uses: aws-actions/configure-aws-credentials@v2
+       with:
+        role-to-assume: arn:aws:iam::675642076779:user/Demoaddval
+        aws-region: ap-south-1
+       
+       
+        
+     - name: Add Github Actions IP to Security group
+       run: |
+        aws ec2 authorize-security-group-ingress --role-to-assume ${{ env.role-to-assume }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32    
+       env:
+        role-to-assume: arn:aws:iam::675642076779:user/Demoaddval
+        aws-region: ap-south-1
+      
+     - name: Deploy Addval Application
+       uses: appleboy/ssh-action@v0.1.2
+       with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: |
+          cd /opt/ # navigate into the folders
+          touch sample.txt
+          
+     -  name: Remove Github Actions IP from security group
+        run: |
+          aws ec2 revoke-security-group-ingress --role-to-assume ${{ env.role-to-assume }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+        env:
+         role-to-assume: arn:aws:iam::675642076779:user/Demoaddval
+         aws-region: ap-south-1
+         if: always()
+          
