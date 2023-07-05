@@ -13,10 +13,6 @@ jobs:
 
     steps:
     
-     - name: Setting environment variables..
-       run: |
-         echo "AWS_DEFAULT_REGION=ap-south-1" >> $GITHUB_ENV
-    
      - name: Add Github Actions IP to Security group
        run: |
          echo -e '#!/bin/bash\nCURRENT_IP=$(curl ifconfig.me)\nRESULT=$(aws ec2 describe-security-groups --group-ids sg-00e4eab7f7c3b961b)\necho "$RESULT" | grep $CURRENT_IP\nif [ $? -eq 1 ]; then\naws ec2 authorize-security-group-ingress --group-id sg-00e4eab7f7c3b961b --protocol tcp --port 22 --cidr "$CURRENT_IP/32"\nelse\necho 'IP already exist'\nfi' > inbound_rule.sh && sh inbound_rule.sh    
@@ -32,8 +28,8 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
-          cd /var/ # navigate into the folders
-          touch demo2.txt
+          cd /opt/ # navigate into the folders
+          touch demo4.txt
           
      -  name: Remove Github Actions IP from security group
         run: |
