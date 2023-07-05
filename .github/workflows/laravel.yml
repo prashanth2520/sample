@@ -33,7 +33,7 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
           cd /opt/ # navigate into the folders
-          touch demo1.txt
+          touch demo2.txt
           
      -  name: Remove Github Actions IP from security group
         run: |
