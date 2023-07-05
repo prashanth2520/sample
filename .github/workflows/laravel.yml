@@ -16,15 +16,13 @@ jobs:
      - name: Setting environment variables..
        run: |
         echo "AWS_DEFAULT_REGION=ap-south-1" >> $GITHUB_ENV
+        echo "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+        echo "AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
     
      - name: Add Github Actions IP to Security group
        run: |
          echo -e '#!/bin/bash\nCURRENT_IP=$(curl ifconfig.me)\nRESULT=$(aws ec2 describe-security-groups --group-ids sg-00e4eab7f7c3b961b)\necho "$RESULT" | grep $CURRENT_IP\nif [ $? -eq 1 ]; then\naws ec2 authorize-security-group-ingress --group-id sg-00e4eab7f7c3b961b --protocol tcp --port 22 --cidr "$CURRENT_IP/32"\nelse\necho 'IP already exist'\nfi' > inbound_rule.sh && sh inbound_rule.sh    
-       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
- 
-      
+        
      - name: Deploy Addval Application
        uses: appleboy/ssh-action@v0.1.2
        with:
@@ -32,14 +30,11 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.SSH_PASSWORD }}
         script: |
-          cd /opt/ # navigate into the folders
+          cd /var/ # navigate into the folders
           touch demo4.txt
           
      -  name: Remove Github Actions IP from security group
         run: |
           echo -e '#!/bin/bash\nIP=$(curl ifconfig.me)\naws ec2 revoke-security-group-ingress --group-id sg-00e4eab7f7c3b961b --protocol tcp --port 22 --cidr $IP/32' > remove_rule.sh && sh remove_rule.sh
-        env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         if: always()
+        
           
