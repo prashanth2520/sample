@@ -4,6 +4,8 @@ name: Laravel
 on:
   push:
     branches: [ "main" ]
+    tags:
+      Demo*
 
 
 jobs:
