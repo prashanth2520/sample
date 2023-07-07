@@ -37,6 +37,7 @@ jobs:
         script: |
           cd /opt/ # navigate into the folders
           touch demo10.txt
+          echo "Deploying tag ${{ github.ref }}"
           
      -  name: Remove Github Actions IP from security group
         run: |
